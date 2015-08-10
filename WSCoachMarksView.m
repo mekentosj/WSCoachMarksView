@@ -13,6 +13,7 @@ static const CGFloat kAnimationDuration = 0.3f;
 static const CGFloat kCutoutRadius = 2.0f;
 static const CGFloat kMaxLblWidth = 230.0f;
 static const CGFloat kLblSpacing = 35.0f;
+static const CGFloat kShadowLayerOffset = 3.0f;
 static const BOOL kEnableContinueLabel = YES;
 static const BOOL kEnableSkipButton = YES;
 
@@ -82,6 +83,18 @@ static const BOOL kEnableSkipButton = YES;
     [mask setFillRule:kCAFillRuleEvenOdd];
     [mask setFillColor:[[UIColor colorWithHue:0.0f saturation:0.0f brightness:0.0f alpha:0.9f] CGColor]];
     [self.layer addSublayer:mask];
+    CGRect layerBounds = self.layer.bounds;
+    layerBounds.origin = CGPointMake(-kShadowLayerOffset, -kShadowLayerOffset);
+    CGSize layerSize = layerBounds.size;
+    layerSize.height += (2 * kShadowLayerOffset);
+    layerSize.width += (2 * kShadowLayerOffset);
+    layerBounds.size = layerSize;
+    self.layer.bounds = layerBounds;
+    self.layer.masksToBounds = NO;
+    self.layer.shadowColor = _maskColor.CGColor;
+    self.layer.shadowOffset = CGSizeMake(0.0, 0.0);
+    self.layer.shadowOpacity = 1.0;
+    self.layer.shadowRadius = kShadowLayerOffset;
     
     // Capture touches
     UITapGestureRecognizer *tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(userDidTap:)];
@@ -219,7 +232,7 @@ static const BOOL kEnableSkipButton = YES;
     if (bottomY > self.bounds.size.height) {
         y = markRect.origin.y - self.lblSpacing - self.lblCaption.frame.size.height;
     }
-    CGFloat x = floorf((self.bounds.size.width - self.lblCaption.frame.size.width) / 2.0f);
+    CGFloat x = floorf((self.bounds.size.width - (2 * kShadowLayerOffset) - self.lblCaption.frame.size.width) / 2.0f);
     
     // Animate the caption label
     self.lblCaption.frame = (CGRect){{x, y}, self.lblCaption.frame.size};
@@ -238,13 +251,13 @@ static const BOOL kEnableSkipButton = YES;
     // Animate the cutout
     [self animateCutoutToRect:markRect withShape:shape];
     
-    CGFloat lblContinueWidth = self.enableSkipButton ? (70.0/100.0) * self.bounds.size.width : self.bounds.size.width;
+    CGFloat lblContinueWidth = self.enableSkipButton ? (70.0/100.0) * self.bounds.size.width - (2 * kShadowLayerOffset) : self.bounds.size.width - (2 * kShadowLayerOffset);
     CGFloat btnSkipWidth = self.bounds.size.width - lblContinueWidth;
     
     // Show continue lbl if first mark
     if (self.enableContinueLabel) {
         if (markIndex == 0) {
-            lblContinue = [[UILabel alloc] initWithFrame:(CGRect){{0, self.bounds.size.height - 30.0f}, {lblContinueWidth, 30.0f}}];
+            lblContinue = [[UILabel alloc] initWithFrame:(CGRect){{0, self.bounds.size.height - (2 * kShadowLayerOffset) - 30.0f}, {lblContinueWidth, 30.0f}}];
             lblContinue.font = [UIFont boldSystemFontOfSize:13.0f];
             lblContinue.textAlignment = NSTextAlignmentCenter;
             lblContinue.text = @"Tap to continue";
@@ -262,7 +275,7 @@ static const BOOL kEnableSkipButton = YES;
     }
     
     if (self.enableSkipButton) {
-        btnSkipCoach = [[UIButton alloc] initWithFrame:(CGRect){{lblContinueWidth, self.bounds.size.height - 30.0f}, {btnSkipWidth, 30.0f}}];
+        btnSkipCoach = [[UIButton alloc] initWithFrame:(CGRect){{lblContinueWidth, self.bounds.size.height - (2 * kShadowLayerOffset) - 30.0f}, {btnSkipWidth, 30.0f}}];
         [btnSkipCoach addTarget:self action:@selector(skipCoach) forControlEvents:UIControlEventTouchUpInside];
         [btnSkipCoach setTitle:@"Skip" forState:UIControlStateNormal];
         btnSkipCoach.titleLabel.font = [UIFont boldSystemFontOfSize:13.0f];
