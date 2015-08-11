@@ -13,7 +13,7 @@ static const CGFloat kAnimationDuration = 0.3f;
 static const CGFloat kCutoutRadius = 2.0f;
 static const CGFloat kMaxLblWidth = 300.0f;
 static const CGFloat kLblSpacing = 35.0f;
-static const CGFloat kButtonHeight = 30.0f;
+static const CGFloat kButtonHeight = 60.0f;
 static const CGFloat kShadowLayerOffset = 3.0f;
 
 @implementation WSCoachMarksView {
@@ -266,7 +266,7 @@ static const CGFloat kShadowLayerOffset = 3.0f;
     btnBack = [[UIButton alloc] initWithFrame:(CGRect){{backButtonX, buttonY}, {backButtonWidth, kButtonHeight}}];
     [btnBack addTarget:self action:@selector(goToPreviousCoachMark) forControlEvents:UIControlEventTouchUpInside];
     [btnBack setTitle:@"Back" forState:UIControlStateNormal];
-    btnBack.titleLabel.font = [UIFont boldSystemFontOfSize:13.0f];
+    btnBack.titleLabel.font = [UIFont boldSystemFontOfSize:15.0f];
     btnBack.alpha = 0.0f;
     [self addSubview:btnBack];
     [UIView animateWithDuration:0.3f delay:1.0f options:0 animations:^{
@@ -277,7 +277,7 @@ static const CGFloat kShadowLayerOffset = 3.0f;
     btnSkipCoach = [[UIButton alloc] initWithFrame:(CGRect){{skipButtonX, buttonY}, {skipButtonWidth, kButtonHeight}}];
     [btnSkipCoach addTarget:self action:@selector(skipCoach) forControlEvents:UIControlEventTouchUpInside];
     [btnSkipCoach setTitle:@"Skip" forState:UIControlStateNormal];
-    btnSkipCoach.titleLabel.font = [UIFont boldSystemFontOfSize:13.0f];
+    btnSkipCoach.titleLabel.font = [UIFont boldSystemFontOfSize:15.0f];
     btnSkipCoach.alpha = 0.0f;
     [btnSkipCoach setTitleColor:[UIColor lightGrayColor] forState:UIControlStateNormal];
     [self addSubview:btnSkipCoach];
@@ -287,7 +287,7 @@ static const CGFloat kShadowLayerOffset = 3.0f;
     
     // Next label
     lblContinue = [[UILabel alloc] initWithFrame:(CGRect){{continueLabelX, buttonY}, {continueLabelWidth,kButtonHeight}}];
-    lblContinue.font = [UIFont boldSystemFontOfSize:13.0f];
+    lblContinue.font = [UIFont boldSystemFontOfSize:15.0f];
     lblContinue.textAlignment = NSTextAlignmentCenter;
     lblContinue.text = @"Next";
     lblContinue.alpha = 0.0f;
