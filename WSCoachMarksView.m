@@ -215,11 +215,44 @@ static const CGFloat kShadowLayerOffset = 3.0f;
     // Coach mark definition
     NSDictionary *markDef = [self.coachMarks objectAtIndex:index];
     NSString *markCaption = [markDef objectForKey:@"caption"];
-    CGRect markRect = [[markDef objectForKey:@"rect"] CGRectValue];
     
     NSString *shape = @"other";
     if([[markDef allKeys] containsObject:@"shape"])
         shape = [markDef objectForKey:@"shape"];
+    
+    UIEdgeInsets markInsets = UIEdgeInsetsZero;
+    if ([[markDef allKeys] containsObject:@"insets"])
+        markInsets = [[markDef objectForKey:@"insets"] UIEdgeInsetsValue];
+    
+    // Type-check the object found for the "views" key
+    NSArray *markViewsArray = nil;
+    id viewOrArray = [markDef objectForKey:@"views"];
+    if ([viewOrArray isKindOfClass:[UIView class]])
+    {
+        markViewsArray = @[viewOrArray];
+    }
+    else if ([viewOrArray isKindOfClass:[NSArray class]])
+    {
+        markViewsArray = viewOrArray;
+    }
+    
+    // Construct the CGRect for the current coach mark from one or more UIViews.
+    // (The resulting CGRect is a CGRectUnion of all those views' bounds).
+    CGRect markRect = CGRectNull;
+    for (UIView *view in markViewsArray)
+    {
+        CGRect currentRect = UIEdgeInsetsInsetRect([view convertRect:view.bounds toView:self.superview], markInsets);
+        
+        if (CGRectEqualToRect(markRect, CGRectNull))
+        {
+            // First time around the loop
+            markRect = currentRect;
+        }
+        else
+        {
+            markRect = CGRectUnion(currentRect, markRect);
+        }
+    }
     
     // Delegate (coachMarksView:willNavigateTo:atIndex:)
     if ([self.delegate respondsToSelector:@selector(coachMarksView:willNavigateToIndex:)]) {
