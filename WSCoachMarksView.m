@@ -14,6 +14,7 @@ static const CGFloat kCutoutRadius = 2.0f;
 static const CGFloat kMaxLblWidth = 300.0f;
 static const CGFloat kLblSpacing = 35.0f;
 static const CGFloat kButtonHeight = 60.0f;
+static const CGFloat kButtonPadding = 10.0f;
 static const CGFloat kShadowLayerOffset = 3.0f;
 
 @implementation WSCoachMarksView {
@@ -254,12 +255,12 @@ static const CGFloat kShadowLayerOffset = 3.0f;
     // Animate the cutout
     [self animateCutoutToRect:markRect withShape:shape];
     
-    CGFloat backButtonWidth = (20.0f/100.0f) * self.bounds.size.width - (2 * kShadowLayerOffset);
-    CGFloat skipButtonWidth = (20.0f/100.0f) * self.bounds.size.width - (2 * kShadowLayerOffset);
-    CGFloat continueLabelWidth = (20.0f/100.0f) * self.bounds.size.width - (2 * kShadowLayerOffset);
-    CGFloat backButtonX = 0.0f;
-    CGFloat skipButtonX = self.bounds.size.width - (2.0f * kShadowLayerOffset) - continueLabelWidth - skipButtonWidth;
-    CGFloat continueLabelX = self.bounds.size.width - (2.0f * kShadowLayerOffset) - continueLabelWidth;
+    CGFloat backButtonWidth = (16.0f/100.0f) * self.bounds.size.width - (2 * kShadowLayerOffset);
+    CGFloat skipButtonWidth = (16.0f/100.0f) * self.bounds.size.width - (2 * kShadowLayerOffset);
+    CGFloat continueLabelWidth = (16.0f/100.0f) * self.bounds.size.width - (2 * kShadowLayerOffset);
+    CGFloat backButtonX = kButtonPadding;
+    CGFloat skipButtonX = self.bounds.size.width - (2.0f * kShadowLayerOffset) - continueLabelWidth - skipButtonWidth - kButtonPadding;
+    CGFloat continueLabelX = self.bounds.size.width - (2.0f * kShadowLayerOffset) - continueLabelWidth - kButtonPadding;
     CGFloat buttonY = self.bounds.size.height - (2.0f * kShadowLayerOffset) - kButtonHeight;
     
     // Back button
