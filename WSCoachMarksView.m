@@ -179,6 +179,10 @@ static const CGFloat kShadowLayerOffset = 3.0f;
 
 #pragma mark - Navigation
 
+- (void)start {
+    [self startAtCoachMark:0];
+}
+
 - (void)startAtCoachMark:(NSUInteger)coachMarkIndex {
     // Fade in self
     self.alpha = 0.0f;

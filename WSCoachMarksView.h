@@ -53,6 +53,7 @@
 @property (nonatomic) CGFloat lblSpacing;
 
 - (id)initWithFrame:(CGRect)frame coachMarks:(NSArray *)marks;
+- (void)start;
 - (void)startAtCoachMark:(NSUInteger)coachMarkIndex;
 
 @end
