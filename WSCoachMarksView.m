@@ -305,7 +305,7 @@ static const CGFloat kShadowLayerOffset = 3.0f;
     CGFloat buttonY = self.bounds.size.height - (2.0f * kShadowLayerOffset) - kButtonHeight;
     
     // Back button
-    btnBack = [[UIButton alloc] initWithFrame:(CGRect){{backButtonX, buttonY}, {backButtonWidth, kButtonHeight}}];
+    btnBack = [[UIButton alloc] initWithFrame:CGRectMake(backButtonX, buttonY, backButtonWidth, kButtonHeight)];
     [btnBack addTarget:self action:@selector(goToPreviousCoachMark) forControlEvents:UIControlEventTouchUpInside];
     [btnBack setTitle:@"Back" forState:UIControlStateNormal];
     btnBack.titleLabel.font = [UIFont boldSystemFontOfSize:15.0f];
@@ -316,7 +316,7 @@ static const CGFloat kShadowLayerOffset = 3.0f;
     } completion:nil];
     
     // Skip button
-    btnSkipCoach = [[UIButton alloc] initWithFrame:(CGRect){{skipButtonX, buttonY}, {skipButtonWidth, kButtonHeight}}];
+    btnSkipCoach = [[UIButton alloc] initWithFrame:CGRectMake(skipButtonX, buttonY, skipButtonWidth, kButtonHeight)];
     [btnSkipCoach addTarget:self action:@selector(skipCoach) forControlEvents:UIControlEventTouchUpInside];
     [btnSkipCoach setTitle:@"Skip" forState:UIControlStateNormal];
     btnSkipCoach.titleLabel.font = [UIFont boldSystemFontOfSize:15.0f];
@@ -328,7 +328,7 @@ static const CGFloat kShadowLayerOffset = 3.0f;
     } completion:nil];
     
     // Next label
-    lblContinue = [[UILabel alloc] initWithFrame:(CGRect){{continueLabelX, buttonY}, {continueLabelWidth,kButtonHeight}}];
+    lblContinue = [[UILabel alloc] initWithFrame:CGRectMake(continueLabelX, buttonY, continueLabelWidth, kButtonHeight)];
     lblContinue.font = [UIFont boldSystemFontOfSize:15.0f];
     lblContinue.textAlignment = NSTextAlignmentCenter;
     lblContinue.text = @"Next";
