@@ -80,6 +80,9 @@ static const CGFloat kShadowLayerOffset = 3.0f;
     [mask setFillRule:kCAFillRuleEvenOdd];
     [mask setFillColor:[[UIColor colorWithHue:0.0f saturation:0.0f brightness:0.0f alpha:0.9f] CGColor]];
     [self.layer addSublayer:mask];
+    
+    // Overdraw the layer so an overlap = kShadowLayer offset exists around all four edges of the layer
+    // (This allows the underlying shadow to extend to the edges of the transluscent coach marks view)
     CGRect layerBounds = self.layer.bounds;
     layerBounds.origin = CGPointMake(-kShadowLayerOffset, -kShadowLayerOffset);
     CGSize layerSize = layerBounds.size;
