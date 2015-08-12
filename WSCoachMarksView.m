@@ -238,6 +238,11 @@ static const CGFloat kShadowLayerOffset = 3.0f;
     {
         markViewsArray = viewOrArray;
     }
+    else
+    {
+        // Un-expected format or nil object
+        NSAssert(NO, @"Unexpected class for object for key 'views', or no object set. Please pass in one or more UIViews for the 'views' key instead.");
+    }
     
     // Construct the CGRect for the current coach mark from one or more UIViews.
     // (The resulting CGRect is a CGRectUnion of all those views' bounds).
