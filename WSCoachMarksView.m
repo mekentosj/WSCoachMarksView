@@ -19,7 +19,6 @@ static const CGFloat kShadowLayerOffset = 3.0f;
 
 @implementation WSCoachMarksView {
     CAShapeLayer *mask;
-    NSUInteger markIndex;
     UIButton *btnBack;
     UILabel *lblContinue;
     UIButton *btnSkipCoach;
@@ -175,12 +174,12 @@ static const CGFloat kShadowLayerOffset = 3.0f;
 
 - (void)userDidTap:(UITapGestureRecognizer *)recognizer {
     // Go to the next coach mark
-    [self goToCoachMarkIndexed:(markIndex+1)];
+    [self goToCoachMarkIndexed:(self.markIndex+1)];
 }
 
 #pragma mark - Navigation
 
-- (void)start {
+- (void)startAtCoachMark:(NSUInteger)coachMarkIndex {
     // Fade in self
     self.alpha = 0.0f;
     self.hidden = NO;
@@ -190,14 +189,14 @@ static const CGFloat kShadowLayerOffset = 3.0f;
                      }
                      completion:^(BOOL finished) {
                          // Go to the first coach mark
-                         [self goToCoachMarkIndexed:0];
+                         [self goToCoachMarkIndexed:coachMarkIndex];
                      }];
 }
 
 - (void)goToPreviousCoachMark {
     // Go to the previous coach mark
-    if (markIndex > 0) {
-        [self goToCoachMarkIndexed:(markIndex-1)];
+    if (self.markIndex > 0) {
+        [self goToCoachMarkIndexed:(self.markIndex-1)];
     }
 }
 
@@ -213,7 +212,7 @@ static const CGFloat kShadowLayerOffset = 3.0f;
     }
     
     // Current index
-    markIndex = index;
+    self.markIndex = index;
     
     // Coach mark definition
     NSDictionary *markDef = [self.coachMarks objectAtIndex:index];
@@ -264,7 +263,7 @@ static const CGFloat kShadowLayerOffset = 3.0f;
     
     // Delegate (coachMarksView:willNavigateTo:atIndex:)
     if ([self.delegate respondsToSelector:@selector(coachMarksView:willNavigateToIndex:)]) {
-        [self.delegate coachMarksView:self willNavigateToIndex:markIndex];
+        [self.delegate coachMarksView:self willNavigateToIndex:self.markIndex];
     }
     
     // Calculate the caption position and size
@@ -287,7 +286,7 @@ static const CGFloat kShadowLayerOffset = 3.0f;
     }];
     
     // If first mark, set the cutout to the center of first mark
-    if (markIndex == 0) {
+    if (self.markIndex == 0) {
         CGPoint center = CGPointMake(floorf(markRect.origin.x + (markRect.size.width / 2.0f)), floorf(markRect.origin.y + (markRect.size.height / 2.0f)));
         CGRect centerZero = (CGRect){center, CGSizeZero};
         [self setCutoutToRect:centerZero withShape:shape];
@@ -369,7 +368,7 @@ static const CGFloat kShadowLayerOffset = 3.0f;
 - (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag {
     // Delegate (coachMarksView:didNavigateTo:atIndex:)
     if ([self.delegate respondsToSelector:@selector(coachMarksView:didNavigateToIndex:)]) {
-        [self.delegate coachMarksView:self didNavigateToIndex:markIndex];
+        [self.delegate coachMarksView:self didNavigateToIndex:self.markIndex];
     }
 }
 

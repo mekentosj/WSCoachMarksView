@@ -44,6 +44,7 @@
 
 @property (nonatomic, WS_WEAK) id<WSCoachMarksViewDelegate> delegate;
 @property (nonatomic, retain) NSArray *coachMarks;
+@property (nonatomic) NSUInteger markIndex;
 @property (nonatomic, retain) UILabel *lblCaption;
 @property (nonatomic, retain) UIColor *maskColor;
 @property (nonatomic) CGFloat animationDuration;
@@ -52,7 +53,7 @@
 @property (nonatomic) CGFloat lblSpacing;
 
 - (id)initWithFrame:(CGRect)frame coachMarks:(NSArray *)marks;
-- (void)start;
+- (void)startAtCoachMark:(NSUInteger)coachMarkIndex;
 
 @end
 
