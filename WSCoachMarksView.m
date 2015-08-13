@@ -307,40 +307,80 @@ static const CGFloat kShadowLayerOffset = 3.0f;
     CGFloat continueLabelX = self.bounds.size.width - (2.0f * kShadowLayerOffset) - continueLabelWidth - kButtonPadding;
     CGFloat buttonY = self.bounds.size.height - (2.0f * kShadowLayerOffset) - kButtonHeight;
     
+    // If the coach mark would overlap the navigation buttons, re-position the buttons to be above the coach mark
+    // (Including the caption, which is likely above the coach mark in this case)
+    if (CGRectGetMaxY(markRect) > buttonY)
+    {
+        buttonY = CGRectGetMinY(self.lblCaption.frame) - (2.0f * kShadowLayerOffset) - kButtonHeight;
+    }
+    
     // Back button
-    btnBack = [[UIButton alloc] initWithFrame:CGRectMake(backButtonX, buttonY, backButtonWidth, kButtonHeight)];
-    [btnBack addTarget:self action:@selector(goToPreviousCoachMark) forControlEvents:UIControlEventTouchUpInside];
-    [btnBack setTitle:@"Back" forState:UIControlStateNormal];
-    btnBack.titleLabel.font = [UIFont boldSystemFontOfSize:15.0f];
-    btnBack.alpha = 0.0f;
-    [self addSubview:btnBack];
-    [UIView animateWithDuration:0.3f delay:1.0f options:0 animations:^{
-        btnBack.alpha = 1.0f;
-    } completion:nil];
+    CGRect backButtonFrame = CGRectMake(backButtonX, buttonY, backButtonWidth, kButtonHeight);
+    if (!btnBack)
+    {
+        btnBack = [[UIButton alloc] initWithFrame:backButtonFrame];
+        [btnBack addTarget:self action:@selector(goToPreviousCoachMark) forControlEvents:UIControlEventTouchUpInside];
+        [btnBack setTitle:@"Back" forState:UIControlStateNormal];
+        btnBack.titleLabel.font = [UIFont boldSystemFontOfSize:15.0f];
+        btnBack.alpha = 0.0f;
+        [self addSubview:btnBack];
+        [UIView animateWithDuration:0.3f delay:1.0f options:0 animations:^{
+            btnBack.alpha = 1.0f;
+        } completion:nil];
+    }
+    else
+    {
+        [UIView animateWithDuration:self.animationDuration
+                         animations:^{
+                             [btnBack setFrame:backButtonFrame];
+                         }];
+    }
     
     // Skip button
-    btnSkipCoach = [[UIButton alloc] initWithFrame:CGRectMake(skipButtonX, buttonY, skipButtonWidth, kButtonHeight)];
-    [btnSkipCoach addTarget:self action:@selector(skipCoach) forControlEvents:UIControlEventTouchUpInside];
-    [btnSkipCoach setTitle:@"Skip" forState:UIControlStateNormal];
-    btnSkipCoach.titleLabel.font = [UIFont boldSystemFontOfSize:15.0f];
-    btnSkipCoach.alpha = 0.0f;
-    [btnSkipCoach setTitleColor:[UIColor lightGrayColor] forState:UIControlStateNormal];
-    [self addSubview:btnSkipCoach];
-    [UIView animateWithDuration:0.3f delay:1.0f options:0 animations:^{
-        btnSkipCoach.alpha = 1.0f;
-    } completion:nil];
+    CGRect skipButtonFrame = CGRectMake(skipButtonX, buttonY, skipButtonWidth, kButtonHeight);
+    if (!btnSkipCoach)
+    {
+        btnSkipCoach = [[UIButton alloc] initWithFrame:skipButtonFrame];
+        [btnSkipCoach addTarget:self action:@selector(skipCoach) forControlEvents:UIControlEventTouchUpInside];
+        [btnSkipCoach setTitle:@"Skip" forState:UIControlStateNormal];
+        btnSkipCoach.titleLabel.font = [UIFont boldSystemFontOfSize:15.0f];
+        btnSkipCoach.alpha = 0.0f;
+        [btnSkipCoach setTitleColor:[UIColor lightGrayColor] forState:UIControlStateNormal];
+        [self addSubview:btnSkipCoach];
+        [UIView animateWithDuration:0.3f delay:1.0f options:0 animations:^{
+            btnSkipCoach.alpha = 1.0f;
+        } completion:nil];
+    }
+    else
+    {
+        [UIView animateWithDuration:self.animationDuration
+                         animations:^{
+                             [btnSkipCoach setFrame:skipButtonFrame];
+                         }];
+    }
     
     // Next label
-    lblContinue = [[UILabel alloc] initWithFrame:CGRectMake(continueLabelX, buttonY, continueLabelWidth, kButtonHeight)];
-    lblContinue.font = [UIFont boldSystemFontOfSize:15.0f];
-    lblContinue.textAlignment = NSTextAlignmentCenter;
-    lblContinue.text = @"Next";
-    lblContinue.alpha = 0.0f;
-    lblContinue.textColor = [UIColor whiteColor];
-    [self addSubview:lblContinue];
-    [UIView animateWithDuration:0.3f delay:1.0f options:0 animations:^{
-        lblContinue.alpha = 1.0f;
-    } completion:nil];
+    CGRect continueLabelFrame = CGRectMake(continueLabelX, buttonY, continueLabelWidth, kButtonHeight);
+    if (!lblContinue)
+    {
+        lblContinue = [[UILabel alloc] initWithFrame:continueLabelFrame];
+        lblContinue.font = [UIFont boldSystemFontOfSize:15.0f];
+        lblContinue.textAlignment = NSTextAlignmentCenter;
+        lblContinue.text = @"Next";
+        lblContinue.alpha = 0.0f;
+        lblContinue.textColor = [UIColor whiteColor];
+        [self addSubview:lblContinue];
+        [UIView animateWithDuration:0.3f delay:1.0f options:0 animations:^{
+            lblContinue.alpha = 1.0f;
+        } completion:nil];
+    }
+    else
+    {
+        [UIView animateWithDuration:self.animationDuration
+                         animations:^{
+                             [lblContinue setFrame:continueLabelFrame];
+                         }];
+    }
 }
 
 #pragma mark - Cleanup
