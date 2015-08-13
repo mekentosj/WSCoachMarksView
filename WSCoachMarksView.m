@@ -311,7 +311,18 @@ static const CGFloat kShadowLayerOffset = 3.0f;
     // (Including the caption, which is likely above the coach mark in this case)
     if (CGRectGetMaxY(markRect) > buttonY)
     {
-        buttonY = CGRectGetMinY(self.lblCaption.frame) - (2.0f * kShadowLayerOffset) - kButtonHeight;
+        if (self.traitCollection.horizontalSizeClass == UIUserInterfaceSizeClassCompact)
+        {
+            // On iPhones in portrait orientation (horizontal size class compact) ensure the buttons have a little
+            // vertical space between their bottom edge and the top edge of the caption text to avoid crowding due to narrowness
+            buttonY = CGRectGetMinY(self.lblCaption.frame) - (2.0f * kShadowLayerOffset) - kButtonHeight;
+        }
+        else
+        {
+            // On iPhones in landscape or iPads in either orientation, we can ensure the bottom edge
+            // of the navigation buttons are exactly aligned with the top edge of the
+            buttonY = CGRectGetMinY(self.lblCaption.frame) - (2.0f * kShadowLayerOffset);
+        }
     }
     
     // Back button
