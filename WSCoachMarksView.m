@@ -13,7 +13,7 @@ static const CGFloat kAnimationDuration = 0.3f;
 static const CGFloat kCutoutRadius = 2.0f;
 static const CGFloat kMaxLblWidth = 300.0f;
 static const CGFloat kLblSpacing = 35.0f;
-static const CGFloat kButtonHeight = 60.0f;
+static const CGFloat kButtonHeight = 30.0f;
 static const CGFloat kButtonPadding = 10.0f;
 static const CGFloat kShadowLayerOffset = 3.0f;
 
@@ -305,7 +305,7 @@ static const CGFloat kShadowLayerOffset = 3.0f;
     CGFloat backButtonX = kButtonPadding;
     CGFloat skipButtonX = self.bounds.size.width - (2.0f * kShadowLayerOffset) - continueLabelWidth - skipButtonWidth - kButtonPadding;
     CGFloat continueLabelX = self.bounds.size.width - (2.0f * kShadowLayerOffset) - continueLabelWidth - kButtonPadding;
-    CGFloat buttonY = self.bounds.size.height - (2.0f * kShadowLayerOffset) - kButtonHeight;
+    CGFloat buttonY = self.bounds.size.height - (2.0f * kShadowLayerOffset) - kButtonHeight - kButtonPadding;
     
     // If the coach mark would overlap the navigation buttons, re-position the buttons to be above the coach mark
     // (Including the caption, which is likely above the coach mark in this case)
