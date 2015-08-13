@@ -328,13 +328,6 @@ static const CGFloat kShadowLayerOffset = 3.0f;
             btnBack.alpha = 1.0f;
         } completion:nil];
     }
-    else
-    {
-        [UIView animateWithDuration:self.animationDuration
-                         animations:^{
-                             [btnBack setFrame:backButtonFrame];
-                         }];
-    }
     
     // Skip button
     CGRect skipButtonFrame = CGRectMake(skipButtonX, buttonY, skipButtonWidth, kButtonHeight);
@@ -350,13 +343,6 @@ static const CGFloat kShadowLayerOffset = 3.0f;
         [UIView animateWithDuration:0.3f delay:1.0f options:0 animations:^{
             btnSkipCoach.alpha = 1.0f;
         } completion:nil];
-    }
-    else
-    {
-        [UIView animateWithDuration:self.animationDuration
-                         animations:^{
-                             [btnSkipCoach setFrame:skipButtonFrame];
-                         }];
     }
     
     // Next label
@@ -374,10 +360,15 @@ static const CGFloat kShadowLayerOffset = 3.0f;
             lblContinue.alpha = 1.0f;
         } completion:nil];
     }
-    else
+    
+    // Animate navigation buttons to their new positions
+    if (!CGRectEqualToRect(btnBack.frame, backButtonFrame) || !CGRectEqualToRect(btnSkipCoach.frame, skipButtonFrame)
+        || !CGRectEqualToRect(lblContinue.frame, continueLabelFrame))
     {
         [UIView animateWithDuration:self.animationDuration
                          animations:^{
+                             [btnBack setFrame:backButtonFrame];
+                             [btnSkipCoach setFrame:skipButtonFrame];
                              [lblContinue setFrame:continueLabelFrame];
                          }];
     }
