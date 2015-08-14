@@ -11,14 +11,15 @@
 
 static const CGFloat kAnimationDuration = 0.3f;
 static const CGFloat kCutoutRadius = 2.0f;
-static const CGFloat kMaxLblWidth = 230.0f;
+static const CGFloat kMaxLblWidth = 300.0f;
 static const CGFloat kLblSpacing = 35.0f;
-static const BOOL kEnableContinueLabel = YES;
-static const BOOL kEnableSkipButton = YES;
+static const CGFloat kButtonHeight = 30.0f;
+static const CGFloat kButtonPadding = 10.0f;
+static const CGFloat kShadowLayerOffset = 3.0f;
 
 @implementation WSCoachMarksView {
     CAShapeLayer *mask;
-    NSUInteger markIndex;
+    UIButton *btnBack;
     UILabel *lblContinue;
     UIButton *btnSkipCoach;
 }
@@ -33,8 +34,6 @@ static const BOOL kEnableSkipButton = YES;
 @synthesize cutoutRadius;
 @synthesize maxLblWidth;
 @synthesize lblSpacing;
-@synthesize enableContinueLabel;
-@synthesize enableSkipButton;
 
 #pragma mark - Methods
 
@@ -74,14 +73,27 @@ static const BOOL kEnableSkipButton = YES;
     self.cutoutRadius = kCutoutRadius;
     self.maxLblWidth = kMaxLblWidth;
     self.lblSpacing = kLblSpacing;
-    self.enableContinueLabel = kEnableContinueLabel;
-    self.enableSkipButton = kEnableSkipButton;
     
     // Shape layer mask
     mask = [CAShapeLayer layer];
     [mask setFillRule:kCAFillRuleEvenOdd];
     [mask setFillColor:[[UIColor colorWithHue:0.0f saturation:0.0f brightness:0.0f alpha:0.9f] CGColor]];
     [self.layer addSublayer:mask];
+    
+    // Overdraw the layer so an overlap = kShadowLayer offset exists around all four edges of the layer
+    // (This allows the underlying shadow to extend to the edges of the transluscent coach marks view)
+    CGRect layerBounds = self.layer.bounds;
+    layerBounds.origin = CGPointMake(-kShadowLayerOffset, -kShadowLayerOffset);
+    CGSize layerSize = layerBounds.size;
+    layerSize.height += (2 * kShadowLayerOffset);
+    layerSize.width += (2 * kShadowLayerOffset);
+    layerBounds.size = layerSize;
+    self.layer.bounds = layerBounds;
+    self.layer.masksToBounds = NO;
+    self.layer.shadowColor = _maskColor.CGColor;
+    self.layer.shadowOffset = CGSizeMake(0.0, 0.0);
+    self.layer.shadowOpacity = 1.0;
+    self.layer.shadowRadius = kShadowLayerOffset;
     
     // Capture touches
     UITapGestureRecognizer *tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(userDidTap:)];
@@ -162,12 +174,16 @@ static const BOOL kEnableSkipButton = YES;
 
 - (void)userDidTap:(UITapGestureRecognizer *)recognizer {
     // Go to the next coach mark
-    [self goToCoachMarkIndexed:(markIndex+1)];
+    [self goToCoachMarkIndexed:(self.markIndex+1)];
 }
 
 #pragma mark - Navigation
 
 - (void)start {
+    [self startAtCoachMark:0];
+}
+
+- (void)startAtCoachMark:(NSUInteger)coachMarkIndex {
     // Fade in self
     self.alpha = 0.0f;
     self.hidden = NO;
@@ -177,8 +193,15 @@ static const BOOL kEnableSkipButton = YES;
                      }
                      completion:^(BOOL finished) {
                          // Go to the first coach mark
-                         [self goToCoachMarkIndexed:0];
+                         [self goToCoachMarkIndexed:coachMarkIndex];
                      }];
+}
+
+- (void)goToPreviousCoachMark {
+    // Go to the previous coach mark
+    if (self.markIndex > 0) {
+        [self goToCoachMarkIndexed:(self.markIndex-1)];
+    }
 }
 
 - (void)skipCoach {
@@ -193,20 +216,58 @@ static const BOOL kEnableSkipButton = YES;
     }
     
     // Current index
-    markIndex = index;
+    self.markIndex = index;
     
     // Coach mark definition
     NSDictionary *markDef = [self.coachMarks objectAtIndex:index];
     NSString *markCaption = [markDef objectForKey:@"caption"];
-    CGRect markRect = [[markDef objectForKey:@"rect"] CGRectValue];
     
     NSString *shape = @"other";
     if([[markDef allKeys] containsObject:@"shape"])
         shape = [markDef objectForKey:@"shape"];
     
+    UIEdgeInsets markInsets = UIEdgeInsetsZero;
+    if ([[markDef allKeys] containsObject:@"insets"])
+        markInsets = [[markDef objectForKey:@"insets"] UIEdgeInsetsValue];
+    
+    // Type-check the object found for the "views" key
+    NSArray *markViewsArray = nil;
+    id viewOrArray = [markDef objectForKey:@"views"];
+    if ([viewOrArray isKindOfClass:[UIView class]])
+    {
+        markViewsArray = @[viewOrArray];
+    }
+    else if ([viewOrArray isKindOfClass:[NSArray class]])
+    {
+        markViewsArray = viewOrArray;
+    }
+    else
+    {
+        // Un-expected format or nil object
+        NSAssert(NO, @"Unexpected class for object for key 'views', or no object set. Please pass in one or more UIViews for the 'views' key instead.");
+    }
+    
+    // Construct the CGRect for the current coach mark from one or more UIViews.
+    // (The resulting CGRect is a CGRectUnion of all those views' bounds).
+    CGRect markRect = CGRectNull;
+    for (UIView *view in markViewsArray)
+    {
+        CGRect currentRect = UIEdgeInsetsInsetRect([view convertRect:view.bounds toView:self.superview], markInsets);
+        
+        if (CGRectEqualToRect(markRect, CGRectNull))
+        {
+            // First time around the loop
+            markRect = currentRect;
+        }
+        else
+        {
+            markRect = CGRectUnion(currentRect, markRect);
+        }
+    }
+    
     // Delegate (coachMarksView:willNavigateTo:atIndex:)
     if ([self.delegate respondsToSelector:@selector(coachMarksView:willNavigateToIndex:)]) {
-        [self.delegate coachMarksView:self willNavigateToIndex:markIndex];
+        [self.delegate coachMarksView:self willNavigateToIndex:self.markIndex];
     }
     
     // Calculate the caption position and size
@@ -219,7 +280,7 @@ static const BOOL kEnableSkipButton = YES;
     if (bottomY > self.bounds.size.height) {
         y = markRect.origin.y - self.lblSpacing - self.lblCaption.frame.size.height;
     }
-    CGFloat x = floorf((self.bounds.size.width - self.lblCaption.frame.size.width) / 2.0f);
+    CGFloat x = floorf((self.bounds.size.width - (2 * kShadowLayerOffset) - self.lblCaption.frame.size.width) / 2.0f);
     
     // Animate the caption label
     self.lblCaption.frame = (CGRect){{x, y}, self.lblCaption.frame.size};
@@ -229,7 +290,7 @@ static const BOOL kEnableSkipButton = YES;
     }];
     
     // If first mark, set the cutout to the center of first mark
-    if (markIndex == 0) {
+    if (self.markIndex == 0) {
         CGPoint center = CGPointMake(floorf(markRect.origin.x + (markRect.size.width / 2.0f)), floorf(markRect.origin.y + (markRect.size.height / 2.0f)));
         CGRect centerZero = (CGRect){center, CGSizeZero};
         [self setCutoutToRect:centerZero withShape:shape];
@@ -238,40 +299,89 @@ static const BOOL kEnableSkipButton = YES;
     // Animate the cutout
     [self animateCutoutToRect:markRect withShape:shape];
     
-    CGFloat lblContinueWidth = self.enableSkipButton ? (70.0/100.0) * self.bounds.size.width : self.bounds.size.width;
-    CGFloat btnSkipWidth = self.bounds.size.width - lblContinueWidth;
+    CGFloat backButtonWidth = (16.0f/100.0f) * self.bounds.size.width - (2 * kShadowLayerOffset);
+    CGFloat skipButtonWidth = (16.0f/100.0f) * self.bounds.size.width - (2 * kShadowLayerOffset);
+    CGFloat continueLabelWidth = (16.0f/100.0f) * self.bounds.size.width - (2 * kShadowLayerOffset);
+    CGFloat backButtonX = kButtonPadding;
+    CGFloat skipButtonX = self.bounds.size.width - (2.0f * kShadowLayerOffset) - continueLabelWidth - skipButtonWidth - kButtonPadding;
+    CGFloat continueLabelX = self.bounds.size.width - (2.0f * kShadowLayerOffset) - continueLabelWidth - kButtonPadding;
+    CGFloat buttonY = self.bounds.size.height - (2.0f * kShadowLayerOffset) - kButtonHeight - kButtonPadding;
     
-    // Show continue lbl if first mark
-    if (self.enableContinueLabel) {
-        if (markIndex == 0) {
-            lblContinue = [[UILabel alloc] initWithFrame:(CGRect){{0, self.bounds.size.height - 30.0f}, {lblContinueWidth, 30.0f}}];
-            lblContinue.font = [UIFont boldSystemFontOfSize:13.0f];
-            lblContinue.textAlignment = NSTextAlignmentCenter;
-            lblContinue.text = @"Tap to continue";
-            lblContinue.alpha = 0.0f;
-            lblContinue.backgroundColor = [UIColor whiteColor];
-            [self addSubview:lblContinue];
-            [UIView animateWithDuration:0.3f delay:1.0f options:0 animations:^{
-                lblContinue.alpha = 1.0f;
-            } completion:nil];
-        } else if (markIndex > 0 && lblContinue != nil) {
-            // Otherwise, remove the lbl
-            [lblContinue removeFromSuperview];
-            lblContinue = nil;
+    // If the coach mark would overlap the navigation buttons, re-position the buttons to be above the coach mark
+    // (Including the caption, which is likely above the coach mark in this case)
+    if (CGRectGetMaxY(markRect) > buttonY)
+    {
+        if (self.traitCollection.horizontalSizeClass == UIUserInterfaceSizeClassCompact)
+        {
+            // On iPhones in portrait orientation (horizontal size class compact) ensure the buttons have a little
+            // vertical space between their bottom edge and the top edge of the caption text to avoid crowding due to narrowness
+            buttonY = CGRectGetMinY(self.lblCaption.frame) - (2.0f * kShadowLayerOffset) - kButtonHeight;
+        }
+        else
+        {
+            // On iPhones in landscape or iPads in either orientation, we can ensure the bottom edge
+            // of the navigation buttons are exactly aligned with the top edge of the
+            buttonY = CGRectGetMinY(self.lblCaption.frame) - (2.0f * kShadowLayerOffset);
         }
     }
     
-    if (self.enableSkipButton) {
-        btnSkipCoach = [[UIButton alloc] initWithFrame:(CGRect){{lblContinueWidth, self.bounds.size.height - 30.0f}, {btnSkipWidth, 30.0f}}];
+    // Back button
+    CGRect backButtonFrame = CGRectMake(backButtonX, buttonY, backButtonWidth, kButtonHeight);
+    if (!btnBack)
+    {
+        btnBack = [[UIButton alloc] initWithFrame:backButtonFrame];
+        [btnBack addTarget:self action:@selector(goToPreviousCoachMark) forControlEvents:UIControlEventTouchUpInside];
+        [btnBack setTitle:@"Back" forState:UIControlStateNormal];
+        btnBack.titleLabel.font = [UIFont boldSystemFontOfSize:15.0f];
+        btnBack.alpha = 0.0f;
+        [self addSubview:btnBack];
+        [UIView animateWithDuration:0.3f delay:1.0f options:0 animations:^{
+            btnBack.alpha = 1.0f;
+        } completion:nil];
+    }
+    
+    // Skip button
+    CGRect skipButtonFrame = CGRectMake(skipButtonX, buttonY, skipButtonWidth, kButtonHeight);
+    if (!btnSkipCoach)
+    {
+        btnSkipCoach = [[UIButton alloc] initWithFrame:skipButtonFrame];
         [btnSkipCoach addTarget:self action:@selector(skipCoach) forControlEvents:UIControlEventTouchUpInside];
         [btnSkipCoach setTitle:@"Skip" forState:UIControlStateNormal];
-        btnSkipCoach.titleLabel.font = [UIFont boldSystemFontOfSize:13.0f];
+        btnSkipCoach.titleLabel.font = [UIFont boldSystemFontOfSize:15.0f];
         btnSkipCoach.alpha = 0.0f;
-        btnSkipCoach.tintColor = [UIColor whiteColor];
+        [btnSkipCoach setTitleColor:[UIColor lightGrayColor] forState:UIControlStateNormal];
         [self addSubview:btnSkipCoach];
         [UIView animateWithDuration:0.3f delay:1.0f options:0 animations:^{
             btnSkipCoach.alpha = 1.0f;
         } completion:nil];
+    }
+    
+    // Next label
+    CGRect continueLabelFrame = CGRectMake(continueLabelX, buttonY, continueLabelWidth, kButtonHeight);
+    if (!lblContinue)
+    {
+        lblContinue = [[UILabel alloc] initWithFrame:continueLabelFrame];
+        lblContinue.font = [UIFont boldSystemFontOfSize:15.0f];
+        lblContinue.textAlignment = NSTextAlignmentCenter;
+        lblContinue.text = @"Next";
+        lblContinue.alpha = 0.0f;
+        lblContinue.textColor = [UIColor whiteColor];
+        [self addSubview:lblContinue];
+        [UIView animateWithDuration:0.3f delay:1.0f options:0 animations:^{
+            lblContinue.alpha = 1.0f;
+        } completion:nil];
+    }
+    
+    // Animate navigation buttons to their new positions
+    if (!CGRectEqualToRect(btnBack.frame, backButtonFrame) || !CGRectEqualToRect(btnSkipCoach.frame, skipButtonFrame)
+        || !CGRectEqualToRect(lblContinue.frame, continueLabelFrame))
+    {
+        [UIView animateWithDuration:self.animationDuration
+                         animations:^{
+                             [btnBack setFrame:backButtonFrame];
+                             [btnSkipCoach setFrame:skipButtonFrame];
+                             [lblContinue setFrame:continueLabelFrame];
+                         }];
     }
 }
 
@@ -304,7 +414,7 @@ static const BOOL kEnableSkipButton = YES;
 - (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag {
     // Delegate (coachMarksView:didNavigateTo:atIndex:)
     if ([self.delegate respondsToSelector:@selector(coachMarksView:didNavigateToIndex:)]) {
-        [self.delegate coachMarksView:self didNavigateToIndex:markIndex];
+        [self.delegate coachMarksView:self didNavigateToIndex:self.markIndex];
     }
 }
 
