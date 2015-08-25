@@ -311,7 +311,9 @@ static const CGFloat kShadowLayerOffset = 3.0f;
     // (Including the caption, which is likely above the coach mark in this case)
     if (CGRectGetMaxY(markRect) > buttonY)
     {
-        if (self.traitCollection.horizontalSizeClass == UIUserInterfaceSizeClassCompact)
+        // It's a older code sir, but it checks out!
+        // (Use older device idiom check rather than traitCollections since they don't exist on iOS 7 and we don't want to crash)
+        if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone)
         {
             // On iPhones in portrait orientation (horizontal size class compact) ensure the buttons have a little
             // vertical space between their bottom edge and the top edge of the caption text to avoid crowding due to narrowness
